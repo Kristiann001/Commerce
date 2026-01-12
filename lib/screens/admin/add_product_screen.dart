@@ -1,0 +1,129 @@
+import 'package:flutter/material.dart';
+import '../../models/product_model.dart';
+import '../../services/firestore_service.dart';
+
+class AddProductScreen extends StatefulWidget {
+  final ProductModel? product; 
+
+  const AddProductScreen({super.key, this.product});
+
+  @override
+  State<AddProductScreen> createState() => _AddProductScreenState();
+}
+
+class _AddProductScreenState extends State<AddProductScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _descController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _imageController = TextEditingController();
+  String _category = 'Others'; // Default category
+  final FirestoreService _firestoreService = FirestoreService();
+  bool _isLoading = false;
+
+  final List<String> _categories = [
+    'Phones', 'Computing', 'Fashion', 'Home', 'Sports', 'Gaming', 'Grocery', 'Health', 'Baby', 'Others'
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.product != null) {
+      _nameController.text = widget.product!.name;
+      _descController.text = widget.product!.description;
+      _priceController.text = widget.product!.price.toString();
+      _imageController.text = widget.product!.imageUrl;
+      _category = widget.product!.category;
+      if (!_categories.contains(_category)) {
+        _categories.add(_category); // Handle legacy or custom categories
+      }
+    }
+  }
+
+  void _saveProduct() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+
+      final product = ProductModel(
+        id: widget.product?.id ?? '', 
+        name: _nameController.text,
+        description: _descController.text,
+        price: double.parse(_priceController.text),
+        imageUrl: _imageController.text,
+        category: _category,
+      );
+
+      try {
+        if (widget.product == null) {
+          await _firestoreService.addProduct(product);
+        } else {
+          await _firestoreService.updateProduct(product);
+        }
+        if (mounted) Navigator.pop(context);
+      } catch (e) {
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.product == null ? 'Add Product' : 'Edit Product')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Product Name'),
+                validator: (val) => val!.isEmpty ? 'Enter name' : null,
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                // ignore: deprecated_member_use
+                value: _category,
+                decoration: const InputDecoration(labelText: 'Category'),
+                items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                onChanged: (val) => setState(() => _category = val!),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                maxLines: 3,
+                validator: (val) => val!.isEmpty ? 'Enter description' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _priceController,
+                decoration: const InputDecoration(labelText: 'Price'),
+                keyboardType: TextInputType.number,
+                validator: (val) => val!.isEmpty ? 'Enter price' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _imageController,
+                decoration: const InputDecoration(labelText: 'Image URL'),
+              ),
+              const SizedBox(height: 24),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: _saveProduct,
+                      style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 50)),
+                      child: Text(widget.product == null ? 'Add Product' : 'Update Product'),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
