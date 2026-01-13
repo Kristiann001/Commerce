@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OrderModel {
   final String id;
-  final String oderId;
+  final String orderId;
   final String userId;
   final List<OrderItem> items;
   final double total;
@@ -12,7 +12,7 @@ class OrderModel {
 
   OrderModel({
     required this.id,
-    required this.oderId,
+    required this.orderId,
     required this.userId,
     required this.items,
     required this.total,
@@ -24,7 +24,7 @@ class OrderModel {
   factory OrderModel.fromMap(Map<String, dynamic> map, String docId) {
     return OrderModel(
       id: docId,
-      oderId: map['orderId'] ?? 'ORD-${docId.substring(0, 6).toUpperCase()}',
+      orderId: map['orderId'] ?? 'ORD-${docId.substring(0, 6).toUpperCase()}',
       userId: map['userId'] ?? '',
       items: (map['items'] as List<dynamic>?)
           ?.map((item) => OrderItem.fromMap(item))
@@ -38,7 +38,7 @@ class OrderModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'orderId': oderId,
+      'orderId': orderId,
       'userId': userId,
       'items': items.map((item) => item.toMap()).toList(),
       'total': total,

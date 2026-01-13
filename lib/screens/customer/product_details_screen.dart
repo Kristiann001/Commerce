@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/product_model.dart';
+import '../../models/user_model.dart';
+import '../../services/auth_service.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
@@ -15,8 +17,8 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  String _selectedSize = 'M';
-  Color _selectedColor = AppTheme.primaryColor;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,22 +103,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         style: TextStyle(color: Colors.grey[600], height: 1.6),
                       ),
                       const SizedBox(height: 24),
-                      _buildSectionTitle('Select Size'),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: ['S', 'M', 'L', 'XL'].map((s) => _buildSizeBtn(s)).toList(),
-                      ),
+
                       const SizedBox(height: 24),
-                      _buildSectionTitle('Select Color'),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          AppTheme.primaryColor,
-                          AppTheme.secondaryColor,
-                          Colors.amber,
-                          Colors.red[300]!
-                        ].map((c) => _buildColorBtn(c)).toList(),
-                      ),
+
                       const SizedBox(height: 120),
                     ],
                   ),
@@ -150,18 +139,39 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ],
                   ),
                   const Spacer(),
-                  ElevatedButton(
-                    onPressed: () {
-                      Provider.of<CartProvider>(context, listen: false).addToCart(widget.product);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${widget.product.name} added to cart!'), behavior: SnackBarBehavior.floating),
+                  FutureBuilder<UserModel?>(
+                    future: Provider.of<AuthService>(context, listen: false).getCurrentUser(),
+                    builder: (context, snapshot) {
+                      final isOwner = snapshot.hasData && snapshot.data!.role == UserRole.admin;
+                      
+                      if (isOwner) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Text(
+                            'Admin View Only',
+                            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      }
+
+                      return ElevatedButton(
+                        onPressed: () {
+                          Provider.of<CartProvider>(context, listen: false).addToCart(widget.product);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('${widget.product.name} added to cart!'), behavior: SnackBarBehavior.floating),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                        ),
+                        child: const Text('Add to Cart'),
                       );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    ),
-                    child: const Text('Add to Cart'),
+                    }
                   ),
                 ],
               ),
@@ -189,47 +199,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return Text(title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold));
   }
 
-  Widget _buildSizeBtn(String size) {
-    final isSelected = _selectedSize == size;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedSize = size),
-      child: Container(
-        margin: const EdgeInsets.only(right: 12),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected ? null : Border.all(color: Colors.grey[200]!),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          size,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildColorBtn(Color color) {
-    final isSelected = _selectedColor == color;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedColor = color),
-      child: Container(
-        margin: const EdgeInsets.only(right: 16),
-        width: 36,
-        height: 36,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
-          // ignore: deprecated_member_use
-          boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10)] : [],
-        ),
-      ),
-    );
-  }
+
+
 }

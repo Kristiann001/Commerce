@@ -43,12 +43,16 @@ class FirestoreService {
   Stream<List<OrderModel>> getOrdersForUser(String userId) {
     return _ordersRef
         .where('userId', isEqualTo: userId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
+      final orders = snapshot.docs.map((doc) {
         return OrderModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
       }).toList();
+      
+      // Sort client-side to avoid Firestore composite index requirement
+      orders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      
+      return orders;
     });
   }
 

@@ -118,7 +118,7 @@ class MyOrdersScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                order.oderId,
+                order.orderId,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Container(
