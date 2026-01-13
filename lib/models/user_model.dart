@@ -9,6 +9,8 @@ class UserModel {
   final String name; // Added
   final UserRole role;
 
+  String get id => uid;
+
   UserModel({
     required this.uid,
     required this.email,

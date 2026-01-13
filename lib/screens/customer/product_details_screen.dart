@@ -84,7 +84,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             ),
                           ),
                           Text(
-                            '\$${widget.product.price.toStringAsFixed(2)}',
+                            'KES ${widget.product.price.toStringAsFixed(0)}',
                             style: GoogleFonts.outfit(
                               fontSize: 26,
                               fontWeight: FontWeight.w900,
@@ -134,7 +134,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 color: AppTheme.secondaryColor,
                 borderRadius: BorderRadius.circular(24),
                 // ignore: deprecated_member_use
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20)],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 20)],
               ),
               child: Row(
                 children: [
@@ -144,7 +144,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     children: [
                       const Text('Price', style: TextStyle(color: Colors.grey, fontSize: 12)),
                       Text(
-                        '\$${widget.product.price.toStringAsFixed(2)}',
+                        'KES ${widget.product.price.toStringAsFixed(0)}',
                         style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -179,7 +179,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         margin: const EdgeInsets.all(8),
         padding: const EdgeInsets.all(10),
         // ignore: deprecated_member_use
-        decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), shape: BoxShape.circle),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), shape: BoxShape.circle),
         child: Icon(icon, color: color, size: 20),
       ),
     );
@@ -227,7 +227,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           shape: BoxShape.circle,
           border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
           // ignore: deprecated_member_use
-          boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 10)] : [],
+          boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10)] : [],
         ),
       ),
     );

@@ -4,10 +4,21 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_theme.dart';
 import '../profile/security_screen.dart';
+import '../profile/my_orders_screen.dart';
+import '../profile/shipping_address_screen.dart';
+import '../profile/help_center_screen.dart';
+import '../profile/privacy_policy_screen.dart';
+import '../profile/profile_edit_screen.dart';
+import 'wishlist_screen.dart';
 
-class AccountScreen extends StatelessWidget {
+class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
 
+  @override
+  State<AccountScreen> createState() => _AccountScreenState();
+}
+
+class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -24,7 +35,9 @@ class AccountScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(24, 60, 24, 40),
               decoration: const BoxDecoration(
                 gradient: AppTheme.primaryGradient,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(32),
+                ),
               ),
               child: FutureBuilder(
                 future: authService.getCurrentUser(),
@@ -38,13 +51,17 @@ class AccountScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: const CircleAvatar(
                           radius: 36,
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.person_rounded, size: 40, color: AppTheme.primaryColor),
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: 40,
+                            color: AppTheme.primaryColor,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -64,19 +81,36 @@ class AccountScreen extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               userEmail,
-                              style: const TextStyle(color: Colors.white70, fontSize: 14),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ProfileEditScreen(
+                              onUpdate: () => setState(() {}),
+                            ),
+                          ),
                         ),
-                        child: const Icon(Icons.edit_outlined, color: Colors.white, size: 20),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ),
                     ],
                   );
@@ -97,21 +131,32 @@ class AccountScreen extends StatelessWidget {
                     Icons.shopping_bag_outlined,
                     'My Orders',
                     'Check status & history',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
+                    ),
                   ),
                   _buildOptionTile(
                     context,
                     Icons.favorite_outline_rounded,
                     'Wishlist',
                     'All your saved items',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const WishlistScreen()),
+                    ),
                   ),
                   _buildOptionTile(
                     context,
                     Icons.local_shipping_outlined,
                     'Shipping Address',
                     'Manage locations',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ShippingAddressScreen(),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -122,26 +167,10 @@ class AccountScreen extends StatelessWidget {
                     Icons.security_rounded,
                     'Security',
                     'Password, biometric & more',
-                    () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SecurityScreen()),
-                      );
-                    },
-                  ),
-                  _buildOptionTile(
-                    context,
-                    Icons.notifications_none_rounded,
-                    'Notifications',
-                    'Alerts & updates',
-                    () {},
-                  ),
-                  _buildOptionTile(
-                    context,
-                    Icons.language_rounded,
-                    'Language',
-                    'English (United States)',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SecurityScreen()),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -152,18 +181,28 @@ class AccountScreen extends StatelessWidget {
                     Icons.help_outline_rounded,
                     'Help Center',
                     'FAQs & support',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const HelpCenterScreen(),
+                      ),
+                    ),
                   ),
                   _buildOptionTile(
                     context,
                     Icons.info_outline_rounded,
                     'Privacy Policy',
                     'Terms and conditions',
-                    () {},
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PrivacyPolicyScreen(),
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 32),
-                  
+
                   // Logout Button
                   SizedBox(
                     width: double.infinity,
@@ -176,10 +215,17 @@ class AccountScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                      icon: const Icon(Icons.logout_rounded, color: Colors.red, size: 20),
+                      icon: const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       label: const Text(
                         'Logout',
-                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -218,7 +264,10 @@ class AccountScreen extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: ListTile(

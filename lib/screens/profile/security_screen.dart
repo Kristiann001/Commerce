@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/app_theme.dart';
+import '../profile/change_password_screen.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({super.key});
@@ -9,9 +10,17 @@ class SecurityScreen extends StatefulWidget {
 }
 
 class _SecurityScreenState extends State<SecurityScreen> {
-  bool _faceId = true;
-  bool _fingerprint = false;
-  bool _twoStep = false;
+  late bool _faceId;
+  late bool _fingerprint;
+  late bool _twoStep;
+
+  @override
+  void initState() {
+    super.initState();
+    _faceId = true;
+    _fingerprint = false;
+    _twoStep = false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,35 +30,25 @@ class _SecurityScreenState extends State<SecurityScreen> {
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          _buildSectionHeader('Biometrics'),
-          _buildToggleTile(
-            'Face ID', 
-            'Use Face ID for quick login', 
-            _faceId, 
-            (v) => setState(() => _faceId = v)
+          _buildSectionHeader('Biometric'),
+          _buildToggleTile('Face ID', 'Use face recognition for authentication', _faceId, (value) {
+            setState(() => _faceId = value);
+          }),
+          _buildToggleTile('Fingerprint', 'Use fingerprint for authentication', _fingerprint, (value) {
+            setState(() => _fingerprint = value);
+          }),
+          const SizedBox(height: 24),
+          _buildSectionHeader('Two-Factor Authentication'),
+          _buildToggleTile('Two-Step Verification', 'Add an extra layer of security', _twoStep, (value) {
+            setState(() => _twoStep = value);
+          }),
+          const SizedBox(height: 24),
+          _buildActionTile(
+            Icons.lock_outline, 
+            'Change Password', 
+            () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen()))
           ),
-          _buildToggleTile(
-            'Fingerprint', 
-            'Use Fingerprint for secure payments', 
-            _fingerprint, 
-            (v) => setState(() => _fingerprint = v)
-          ),
-          const SizedBox(height: 32),
-          _buildSectionHeader('Authentication'),
-          _buildToggleTile(
-            'Two-Step Verification', 
-            'Add an extra layer of security', 
-            _twoStep, 
-            (v) => setState(() => _twoStep = v)
-          ),
-          const SizedBox(height: 12),
-          _buildActionTile(Icons.lock_outline, 'Change Password', () {}),
-          _buildActionTile(Icons.devices_outlined, 'Recognized Devices', () {}),
           const SizedBox(height: 48),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Save Changes'),
-          ),
         ],
       ),
     );

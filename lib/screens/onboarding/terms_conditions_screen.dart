@@ -61,7 +61,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
               boxShadow: [
                 BoxShadow(
                   // ignore: deprecated_member_use
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -75,7 +75,12 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                     Checkbox(
                       value: _isAgreed,
                       onChanged: (v) => setState(() => _isAgreed = v!),
-                      activeColor: AppTheme.primaryColor,
+                      fillColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppTheme.primaryColor;
+                        }
+                        return null;
+                      }),
                     ),
                     const Expanded(
                       child: Text(

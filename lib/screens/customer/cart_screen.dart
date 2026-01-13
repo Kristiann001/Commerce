@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../../models/order_model.dart';
+import '../../services/auth_service.dart';
+import '../../services/firestore_service.dart';
 import '../../providers/cart_provider.dart';
+import '../../providers/notification_provider.dart';
 import '../../services/mpesa_service.dart';
 import '../../utils/app_theme.dart';
 
@@ -84,8 +88,7 @@ class CartScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        // ignore: deprecated_member_use
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10)],
       ),
       child: Row(
         children: [
@@ -96,6 +99,14 @@ class CartScreen extends StatelessWidget {
               width: 80,
               height: 80,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 80,
+                  height: 80,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                );
+              },
             ),
           ),
           const SizedBox(width: 16),
@@ -110,8 +121,9 @@ class CartScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // KES Currency
                     Text(
-                      '\$${item.product.price.toStringAsFixed(2)}',
+                      'KES ${item.product.price.toStringAsFixed(0)}',
                       style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                     ),
                     Row(
@@ -150,26 +162,25 @@ class CartScreen extends StatelessWidget {
 
   Widget _buildPriceSummary(BuildContext context, CartProvider cart, MpesaService mpesaService) {
     final subtotal = cart.totalAmount;
-    final shipping = 5.00;
+    final shipping = 200.0; // KES shipping
     final total = subtotal + shipping;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 30, 24, 120), // Extra bottom padding for floating nav
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 120),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-        // ignore: deprecated_member_use
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, -5))],
       ),
       child: Column(
         children: [
-          _summaryRow('Subtotal', '\$${subtotal.toStringAsFixed(2)}'),
+          _summaryRow('Subtotal', 'KES ${subtotal.toStringAsFixed(0)}'),
           const SizedBox(height: 12),
-          _summaryRow('Shipping', '\$${shipping.toStringAsFixed(2)}'),
+          _summaryRow('Shipping', 'KES ${shipping.toStringAsFixed(0)}'),
           const SizedBox(height: 16),
           const Divider(),
           const SizedBox(height: 16),
-          _summaryRow('Total', '\$${total.toStringAsFixed(2)}', isTotal: true),
+          _summaryRow('Total', 'KES ${total.toStringAsFixed(0)}', isTotal: true),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -213,6 +224,7 @@ class CartScreen extends StatelessWidget {
 
   void _showCheckoutBottomSheet(BuildContext context, double amount, MpesaService mpesaService, CartProvider cart) {
     final phoneController = TextEditingController();
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -225,7 +237,7 @@ class CartScreen extends StatelessWidget {
           children: [
             Text('Checkout', style: GoogleFonts.outfit(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text('Confirm your payment of \$${amount.toStringAsFixed(2)} via M-Pesa.', style: TextStyle(color: Colors.grey[600])),
+            Text('Confirm your payment of KES ${amount.toStringAsFixed(0)} via M-Pesa.', style: TextStyle(color: Colors.grey[600])),
             const SizedBox(height: 32),
             TextField(
               controller: phoneController,
@@ -241,18 +253,95 @@ class CartScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                   Navigator.pop(context);
-                   // Show a dummy loading
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Processing M-Pesa Payment...')));
-                   await Future.delayed(const Duration(seconds: 2));
-                   
-                  String? error = await mpesaService.startStkPush(phoneController.text, amount);
+                  final phone = phoneController.text.trim();
+                  if (phone.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a phone number')));
+                    return;
+                  }
+
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing M-Pesa Payment...')),
+                  );
+                  
+                  // Simulate M-Pesa delay
+                  await Future.delayed(const Duration(seconds: 2));
+                  
+                  // In a real app, we would wait for the callback. Here we simulate success if STK push is sent.
+                  String? error = await mpesaService.startStkPush(phone, amount);
+                  
                   if (context.mounted) {
                     if (error == null) {
-                      cart.clearCart();
-                      _showSuccessDialog(context);
+                      try {
+                        // 1. Get User & Address
+                        final authService = Provider.of<AuthService>(context, listen: false);
+                        final firestoreService = FirestoreService();
+                        final user = await authService.getCurrentUser();
+                        
+                        if (user == null) {
+                          throw Exception('User not logged in');
+                        }
+
+                        // Try to get default address
+                        String shippingAddress = 'No address provided';
+                        try {
+                          final address = await firestoreService.getDefaultAddress(user.uid);
+                          if (address != null) {
+                            shippingAddress = '${address.address}, ${address.city}';
+                          }
+                        } catch (e) {
+                          debugPrint('Error fetching address: $e');
+                        }
+
+                        // 2. Create Order in Firestore
+                        final order = OrderModel(
+                          id: '', // Will be set by Firestore
+                          oderId: 'ORD-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
+                          userId: user.uid,
+                          items: cart.items.map((item) => OrderItem(
+                            productId: item.product.id,
+                            productName: item.product.name,
+                            imageUrl: item.product.imageUrl,
+                            price: item.product.price,
+                            quantity: item.quantity,
+                          )).toList(),
+                          total: amount,
+                          status: 'Processing',
+                          shippingAddress: shippingAddress,
+                          createdAt: DateTime.now(),
+                        );
+
+                        await firestoreService.createOrder(order);
+
+                        if (!context.mounted) return;
+
+                        // 3. Notifications
+                        final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+                        notificationProvider.addPaymentNotification(
+                          amount,
+                          cart.items.length == 1 
+                            ? cart.items.first.product.name 
+                            : '${cart.items.length} items',
+                        );
+                        notificationProvider.addOrderNotification(order.oderId);
+                        
+                        // 4. Clear Cart & Show Success
+                        cart.clearCart();
+                        if (context.mounted) {
+                          _showSuccessDialog(context, amount);
+                        }
+
+                      } catch (e) {
+                         if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Order creation failed: $e')),
+                          );
+                         }
+                      }
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $error')));
+                       if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment Error: $error')));
+                       }
                     }
                   }
                 },
@@ -266,7 +355,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  void _showSuccessDialog(BuildContext context) {
+  void _showSuccessDialog(BuildContext context, double amount) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -278,7 +367,9 @@ class CartScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const Text('Payment Successful!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Your order has been placed successfully.', textAlign: TextAlign.center),
+            Text('KES ${amount.toStringAsFixed(0)} paid successfully.', textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            Text('Check your notifications for details.', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
             const SizedBox(height: 24),
             ElevatedButton(onPressed: () => Navigator.pop(context), child: const Text('Back to Home')),
           ],

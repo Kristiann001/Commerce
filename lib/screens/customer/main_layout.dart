@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
 import 'customer_home.dart';
@@ -48,7 +49,7 @@ class _MainLayoutState extends State<MainLayout> {
           boxShadow: [
             BoxShadow(
               // ignore: deprecated_member_use
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -75,6 +76,56 @@ class _MainLayoutState extends State<MainLayout> {
 
   Widget _buildNavItem(int index, IconData activeIcon, IconData inactiveIcon, String tooltip) {
     final isSelected = _currentIndex == index;
+    final isCart = index == 2; // Cart is at index 2
+
+    Widget icon = Icon(
+      isSelected ? activeIcon : inactiveIcon,
+      color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+      size: 26,
+    );
+
+    if (isCart) {
+      icon = Consumer<CartProvider>(
+        builder: (context, cart, child) {
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Icon(
+                isSelected ? activeIcon : inactiveIcon,
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                size: 26,
+              ),
+              if (cart.itemCount > 0)
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '${cart.itemCount}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      );
+    }
+
     return InkWell(
       onTap: () => setState(() => _currentIndex = index),
       borderRadius: BorderRadius.circular(12),
@@ -85,15 +136,11 @@ class _MainLayoutState extends State<MainLayout> {
         decoration: isSelected 
             ? BoxDecoration(
                 // ignore: deprecated_member_use
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               )
             : null,
-        child: Icon(
-          isSelected ? activeIcon : inactiveIcon,
-          color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
-          size: 26,
-        ),
+        child: icon,
       ),
     );
   }

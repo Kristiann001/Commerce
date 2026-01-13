@@ -5,6 +5,8 @@ import 'firebase_options.dart';
 import 'models/user_model.dart';
 import 'providers/cart_provider.dart'; // Import CartProvider
 import 'providers/wishlist_provider.dart'; // Import WishlistProvider
+import 'providers/notification_provider.dart'; // Import NotificationProvider
+import 'providers/language_provider.dart';
 import 'screens/admin/admin_dashboard.dart';
 import 'screens/customer/main_layout.dart'; // Import MainLayout
 import 'screens/login_screen.dart';
@@ -35,12 +37,23 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<WishlistProvider>(
           create: (_) => WishlistProvider(),
         ),
+        ChangeNotifierProvider<NotificationProvider>(
+          create: (_) => NotificationProvider(),
+        ),
+        ChangeNotifierProvider<LanguageProvider>(
+          create: (_) => LanguageProvider(),
+        ),
       ],
-      child: MaterialApp(
-        title: 'Ecommerce Access',
-        theme: AppTheme.lightTheme, // Use Custom Theme
-        debugShowCheckedModeBanner: false,
-        home: const AuthWrapper(), // Changed from OnboardingScreen to AuthWrapper
+      child: Consumer<LanguageProvider>(
+        builder: (context, languageProvider, child) {
+          return MaterialApp(
+            title: 'Ecommerce Access',
+            theme: AppTheme.lightTheme,
+            debugShowCheckedModeBanner: false,
+            locale: languageProvider.currentLocale,
+            home: const AuthWrapper(),
+          );
+        },
       ),
     );
   }
