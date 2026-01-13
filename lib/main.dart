@@ -39,7 +39,8 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Ecommerce Access',
         theme: AppTheme.lightTheme, // Use Custom Theme
-        home: const AuthWrapper(),
+        debugShowCheckedModeBanner: false,
+        home: const AuthWrapper(), // Changed from OnboardingScreen to AuthWrapper
       ),
     );
   }

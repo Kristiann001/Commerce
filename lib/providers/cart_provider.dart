@@ -32,6 +32,18 @@ class CartProvider extends ChangeNotifier {
     _items.removeWhere((item) => item.product.id == product.id);
     notifyListeners();
   }
+
+  void decrementQuantity(ProductModel product) {
+    int index = _items.indexWhere((item) => item.product.id == product.id);
+    if (index >= 0) {
+      if (_items[index].quantity > 1) {
+        _items[index].quantity--;
+      } else {
+        _items.removeAt(index);
+      }
+      notifyListeners();
+    }
+  }
   
   void clearCart() {
     _items.clear();

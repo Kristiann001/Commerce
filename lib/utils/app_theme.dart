@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Futuristic Premium Palette
-  static const Color primaryColor = Color(0xFF2962FF); // Electric Blue
-  static const Color primaryVariant = Color(0xFF0039CB);
+  // Shoplon Ultra Palette
+  static const Color primaryColor = Color(0xFF6C3EE8); // Vibrant Purple/Blue
+  static const Color primaryVariant = Color(0xFF512DA8);
   static const Color secondaryColor = Color(0xFF1A1A1A); // Deep Charcoal
-  static const Color accentColor = Color(0xFFFF6D00);
-  static const Color backgroundColor = Color(0xFFF0F2F5); // Cool Grey
+  static const Color accentColor = Color(0xFFFFB300); // Amber/Gold for contrast
+  static const Color backgroundColor = Color(0xFFFBFBFE); // Very clean off-white
   static const Color surfaceColor = Colors.white;
+  static const Color fieldColor = Color(0xFFF3F4F8); // Grey for input fields
   
   // Custom Gradients
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF2962FF), Color(0xFF6200EA)],
+    colors: [Color(0xFF6C3EE8), Color(0xFF512DA8)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -55,21 +56,21 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-          elevation: 8,
-          shadowColor: primaryColor.withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)), // Slightly less rounded
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 32),
+          elevation: 0, // Flat design for buttons is more modern in Shoplon
+          shadowColor: primaryColor.withValues(alpha: 0.3),
           textStyle: GoogleFonts.outfit(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: primaryColor)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        hintStyle: GoogleFonts.outfit(color: Colors.grey[400]),
+        fillColor: fieldColor,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: primaryColor, width: 1)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        hintStyle: GoogleFonts.outfit(color: Colors.grey[500], fontSize: 14),
       ),
       cardTheme: CardThemeData(
         elevation: 0,

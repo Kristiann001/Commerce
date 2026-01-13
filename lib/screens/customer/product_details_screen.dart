@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../models/product_model.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
-import '../../widgets/glass_box.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
-
   const ProductDetailsScreen({super.key, required this.product});
+
+  @override
+  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  String _selectedSize = 'M';
+  Color _selectedColor = AppTheme.primaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -20,132 +27,143 @@ class ProductDetailsScreen extends StatelessWidget {
           CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
-              // 1. Parallax Header
               SliverAppBar(
-                expandedHeight: 400,
+                expandedHeight: 450,
                 pinned: true,
                 backgroundColor: Colors.transparent,
-                leading: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), shape: BoxShape.circle),
-                  child: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.black), onPressed: () => Navigator.pop(context)),
-                ),
+                leading: _buildCycleButton(Icons.arrow_back_ios_new_rounded, () => Navigator.pop(context)),
                 actions: [
                   Consumer<WishlistProvider>(
                     builder: (context, wishlist, child) {
-                      final isFav = wishlist.isInWishlist(product.id);
-                      return Container(
-                        margin: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.8), shape: BoxShape.circle),
-                        child: IconButton(
-                          icon: Icon(isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded, color: isFav ? Colors.red : Colors.black),
-                          onPressed: () => wishlist.toggleWishlist(product),
-                        ),
+                      final isFav = wishlist.isInWishlist(widget.product.id);
+                      return _buildCycleButton(
+                        isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                        () => wishlist.toggleWishlist(widget.product),
+                        color: isFav ? Colors.red : Colors.black,
                       );
                     },
                   ),
+                  const SizedBox(width: 8),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Hero(
-                    tag: 'product_${product.id}',
-                    child: product.imageUrl.isNotEmpty
-                        ? Image.network(product.imageUrl, fit: BoxFit.cover)
+                    tag: 'product_${widget.product.id}',
+                    child: widget.product.imageUrl.isNotEmpty
+                        ? Image.network(widget.product.imageUrl, fit: BoxFit.cover)
                         : const Icon(Icons.image, size: 100, color: Colors.grey),
                   ),
                 ),
               ),
-
-              // 2. Product Info
               SliverToBoxAdapter(
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.backgroundColor,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -5))],
+                  padding: const EdgeInsets.all(24),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(child: Text(product.name, style: Theme.of(context).textTheme.displayMedium)),
-                            Text('\$${product.price.toStringAsFixed(2)}', 
-                                 style: const TextStyle(fontSize: 26, color: AppTheme.primaryColor, fontWeight: FontWeight.w900)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Rating simulated
-                        Row(children: [
-                          const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                          const Text(' 4.8 ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('(120 reviews)', style: TextStyle(color: Colors.grey[600])),
-                        ]),
-                        const SizedBox(height: 24),
-                        Text('Description', style: Theme.of(context).textTheme.headlineMedium),
-                        const SizedBox(height: 12),
-                        Text(product.description, style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6)),
-                        const SizedBox(height: 30),
-                        const Divider(),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildTrustBadge(Icons.verified_user_rounded, 'Secure\nPayment'),
-                            _buildTrustBadge(Icons.local_shipping_rounded, 'Fast\nDelivery'),
-                            _buildTrustBadge(Icons.cached_rounded, 'Easy\nReturns'),
-                          ],
-                        ),
-                        const SizedBox(height: 120), // Space for floating cart bar
-                      ],
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.product.name,
+                                  style: GoogleFonts.outfit(fontSize: 28, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  widget.product.category,
+                                  style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '\$${widget.product.price.toStringAsFixed(2)}',
+                            style: GoogleFonts.outfit(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Description'),
+                      const SizedBox(height: 8),
+                      Text(
+                        widget.product.description,
+                        style: TextStyle(color: Colors.grey[600], height: 1.6),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Select Size'),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: ['S', 'M', 'L', 'XL'].map((s) => _buildSizeBtn(s)).toList(),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Select Color'),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          AppTheme.primaryColor,
+                          AppTheme.secondaryColor,
+                          Colors.amber,
+                          Colors.red[300]!
+                        ].map((c) => _buildColorBtn(c)).toList(),
+                      ),
+                      const SizedBox(height: 120),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-
-          // 3. Floating Glass Action Bar
           Positioned(
             left: 20,
             right: 20,
             bottom: 30,
-            child: GlassBox(
-              blur: 20,
-              opacity: 0.9,
-              borderRadius: 25,
-              color: Colors.white,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                child: Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Total Price', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                        Text('\$${product.price.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
-                      ],
-                    ),
-                    const Spacer(),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Provider.of<CartProvider>(context, listen: false).addToCart(product);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${product.name} added to cart!'), behavior: SnackBarBehavior.floating, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryColor,
+                borderRadius: BorderRadius.circular(24),
+                // ignore: deprecated_member_use
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20)],
+              ),
+              child: Row(
+                children: [
+                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text('Price', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      Text(
+                        '\$${widget.product.price.toStringAsFixed(2)}',
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      icon: const Icon(Icons.shopping_bag_outlined),
-                      label: const Text('Add to Cart'),
+                    ],
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      Provider.of<CartProvider>(context, listen: false).addToCart(widget.product);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('${widget.product.name} added to cart!'), behavior: SnackBarBehavior.floating),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
-                  ],
-                ),
+                    child: const Text('Add to Cart'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -154,13 +172,64 @@ class ProductDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTrustBadge(IconData icon, String text) {
-    return Column(
-      children: [
-        Icon(icon, color: AppTheme.primaryColor, size: 28),
-        const SizedBox(height: 8),
-        Text(text, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
+  Widget _buildCycleButton(IconData icon, VoidCallback onTap, {Color color = Colors.black}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(10),
+        // ignore: deprecated_member_use
+        decoration: BoxDecoration(color: Colors.white.withOpacity(0.8), shape: BoxShape.circle),
+        child: Icon(icon, color: color, size: 20),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(title, style: GoogleFonts.outfit(fontSize: 18, fontWeight: FontWeight.bold));
+  }
+
+  Widget _buildSizeBtn(String size) {
+    final isSelected = _selectedSize == size;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedSize = size),
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected ? null : Border.all(color: Colors.grey[200]!),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          size,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColorBtn(Color color) {
+    final isSelected = _selectedColor == color;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedColor = color),
+      child: Container(
+        margin: const EdgeInsets.only(right: 16),
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: isSelected ? Border.all(color: Colors.white, width: 3) : null,
+          // ignore: deprecated_member_use
+          boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 10)] : [],
+        ),
+      ),
     );
   }
 }

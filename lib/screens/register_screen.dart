@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
+import 'auth/profile_setup_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -43,7 +44,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           if (error != null) {
             _errorMessage = error;
           } else {
-            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileSetupScreen(email: _emailController.text),
+              ),
+            );
           }
         });
       }
