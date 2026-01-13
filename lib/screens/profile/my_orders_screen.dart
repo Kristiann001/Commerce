@@ -5,6 +5,7 @@ import '../../models/order_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/image_helper.dart';
 
 class MyOrdersScreen extends StatelessWidget {
   const MyOrdersScreen({super.key});
@@ -158,7 +159,7 @@ class MyOrdersScreen extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    item.imageUrl,
+                    ImageHelper.getSafeImageUrl(item.imageUrl),
                     width: 50,
                     height: 50,
                     fit: BoxFit.cover,

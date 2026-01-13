@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
+import '../../utils/image_helper.dart';
 import 'product_details_screen.dart';
 
 class WishlistScreen extends StatelessWidget {
@@ -73,10 +74,13 @@ class WishlistScreen extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: Image.network(
-                  product.imageUrl,
+                  ImageHelper.getSafeImageUrl(product.imageUrl),
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 80, height: 80, color: Colors.grey[200], child: const Icon(Icons.broken_image, color: Colors.grey),
+                  ),
                 ),
               ),
             ),

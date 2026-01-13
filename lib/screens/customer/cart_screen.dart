@@ -10,6 +10,8 @@ import '../../providers/notification_provider.dart';
 import '../../services/mpesa_service.dart';
 import '../../utils/app_theme.dart';
 
+import '../../utils/image_helper.dart';
+
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
@@ -129,7 +131,7 @@ class _CartScreenState extends State<CartScreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.network(
-              item.product.imageUrl,
+              ImageHelper.getSafeImageUrl(item.product.imageUrl),
               width: 80,
               height: 80,
               fit: BoxFit.cover,

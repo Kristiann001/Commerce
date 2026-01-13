@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../models/product_model.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
+import '../../utils/image_helper.dart';
 import 'add_product_screen.dart';
 
 class AdminDashboard extends StatelessWidget {
@@ -62,7 +63,15 @@ class AdminDashboard extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                         child: product.imageUrl.isNotEmpty
-                            ? Image.network(product.imageUrl, fit: BoxFit.cover, width: double.infinity)
+                            ? Image.network(
+                                ImageHelper.getSafeImageUrl(product.imageUrl),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: Colors.grey[200],
+                                  child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                                ),
+                              )
                             : Container(color: Colors.grey[200], child: const Icon(Icons.image, size: 40, color: Colors.grey)),
                       ),
                     ),

@@ -8,6 +8,7 @@ import '../../services/firestore_service.dart';
 import '../../utils/app_theme.dart';
 import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
+import '../../utils/image_helper.dart';
 import 'product_details_screen.dart';
 
 class CustomerHome extends StatefulWidget {
@@ -18,17 +19,11 @@ class CustomerHome extends StatefulWidget {
 }
 
 class _CustomerHomeState extends State<CustomerHome> {
-  int _selectedCategoryIndex = 0;
+
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   
-  final List<Map<String, dynamic>> _categories = [
-    {'name': 'All', 'icon': Icons.grid_view_rounded},
-    {'name': 'Sale', 'icon': Icons.bolt_rounded},
-    {'name': 'Men', 'icon': Icons.male_rounded},
-    {'name': 'Women', 'icon': Icons.female_rounded},
-    {'name': 'Kids', 'icon': Icons.child_care_rounded},
-  ];
+
 
   @override
   void dispose() {
@@ -41,12 +36,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     List<ProductModel> filtered = products;
     
     // Filter by category
-    if (_selectedCategoryIndex > 0) {
-      String category = _categories[_selectedCategoryIndex]['name'];
-      filtered = filtered.where((p) => 
-        p.category.toLowerCase() == category.toLowerCase()
-      ).toList();
-    }
+
     
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
@@ -271,57 +261,6 @@ class _CustomerHomeState extends State<CustomerHome> {
                 ),
               ),
 
-              // Categories
-              SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    final isSelected = _selectedCategoryIndex == index;
-                    return GestureDetector(
-                      onTap: () => setState(() => _selectedCategoryIndex = index),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: isSelected ? AppTheme.primaryColor : Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                _categories[index]['icon'],
-                                color: isSelected ? Colors.white : Colors.grey[600],
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              _categories[index]['name'],
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
               // Section Title - No "See All"
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
@@ -454,7 +393,7 @@ class _CustomerHomeState extends State<CustomerHome> {
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                         child: Image.network(
-                          product.imageUrl,
+                          ImageHelper.getSafeImageUrl(product.imageUrl),
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,

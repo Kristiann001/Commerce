@@ -8,6 +8,8 @@ import '../../providers/cart_provider.dart';
 import '../../providers/wishlist_provider.dart';
 import '../../utils/app_theme.dart';
 
+import '../../utils/image_helper.dart';
+
 class ProductDetailsScreen extends StatefulWidget {
   final ProductModel product;
   const ProductDetailsScreen({super.key, required this.product});
@@ -17,8 +19,6 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   background: Hero(
                     tag: 'product_${widget.product.id}',
                     child: widget.product.imageUrl.isNotEmpty
-                        ? Image.network(widget.product.imageUrl, fit: BoxFit.cover)
+                        ? Image.network(
+                            ImageHelper.getSafeImageUrl(widget.product.imageUrl),
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image_rounded,
+                                    size: 60,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
                         : const Icon(Icons.image, size: 100, color: Colors.grey),
                   ),
                 ),

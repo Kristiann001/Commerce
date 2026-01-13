@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/product_model.dart';
 import '../../services/firestore_service.dart';
+import '../../utils/image_helper.dart';
 
 class AddProductScreen extends StatefulWidget {
   final ProductModel? product; 
@@ -108,10 +109,44 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 validator: (val) => val!.isEmpty ? 'Enter price' : null,
               ),
               const SizedBox(height: 12),
+              
+              // Image URL Input with Preview Trigger
               TextFormField(
                 controller: _imageController,
                 decoration: const InputDecoration(labelText: 'Image URL'),
+                onChanged: (_) => setState(() {}), // Trigger rebuild to update preview
               ),
+              const SizedBox(height: 12),
+
+              // Image Preview
+              if (_imageController.text.isNotEmpty)
+                Container(
+                  height: 200,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      ImageHelper.getSafeImageUrl(_imageController.text),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, color: Colors.grey, size: 40),
+                            SizedBox(height: 8),
+                            Text('Invalid Image URL', style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
               const SizedBox(height: 24),
               _isLoading
                   ? const Center(child: CircularProgressIndicator())

@@ -5,6 +5,7 @@ import '../../utils/app_theme.dart';
 import '../../models/product_model.dart';
 import '../../services/firestore_service.dart';
 import '../../providers/cart_provider.dart';
+import '../../utils/image_helper.dart';
 import 'product_details_screen.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -296,7 +297,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                product.imageUrl,
+                ImageHelper.getSafeImageUrl(product.imageUrl),
                 width: 70,
                 height: 70,
                 fit: BoxFit.cover,
