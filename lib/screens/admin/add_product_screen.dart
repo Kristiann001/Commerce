@@ -22,9 +22,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final FirestoreService _firestoreService = FirestoreService();
   bool _isLoading = false;
 
-  final List<String> _categories = [
-    'Phones', 'Computing', 'Fashion', 'Home', 'Sports', 'Gaming', 'Grocery', 'Health', 'Baby', 'Others'
-  ];
+
 
   @override
   void initState() {
@@ -35,9 +33,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _priceController.text = widget.product!.price.toString();
       _imageController.text = widget.product!.imageUrl;
       _category = widget.product!.category;
-      if (!_categories.contains(_category)) {
-        _categories.add(_category); // Handle legacy or custom categories
-      }
     }
   }
 
@@ -87,14 +82,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 validator: (val) => val!.isEmpty ? 'Enter name' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                // ignore: deprecated_member_use
-                value: _category,
-                decoration: const InputDecoration(labelText: 'Category'),
-                items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (val) => setState(() => _category = val!),
-              ),
-              const SizedBox(height: 12),
+
               TextFormField(
                 controller: _descController,
                 decoration: const InputDecoration(labelText: 'Description'),
